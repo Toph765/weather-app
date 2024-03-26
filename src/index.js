@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 
-const location = "manila";
+const location = "baao";
 let date;
 let condition;
 let feelsLike;
@@ -14,14 +14,18 @@ let windSpeed;
 function extractData(forecast) {
   const latestForecast = forecast.forecast.forecastday[0];
   const { current } = forecast;
+  const dateTime = format(forecast.location.localtime, "PPPPpaaa").split(
+    " at "
+  );
+  const time = dateTime[1];
 
-  date = `${format(latestForecast.date, "EEEE")}, ${format(latestForecast.date, "PPpp")}`;
+  date = `${dateTime[0]} ${time}`;
   condition = latestForecast.day.condition.text;
-  temp = current.temp_c;
-  feelsLike = current.feelslike_c;
-  humidity = current.humidity;
-  chanceOfRain = latestForecast.day.daily_chance_of_rain;
-  windSpeed = current.wind_kph;
+  temp = `${current.temp_c}°C`;
+  feelsLike = `${current.feelslike_c}°C`;
+  humidity = `${current.humidity}%`;
+  chanceOfRain = `${latestForecast.day.daily_chance_of_rain}%`;
+  windSpeed = `${current.wind_kph}kph`;
   sunrise = latestForecast.astro.sunrise;
   sunset = latestForecast.astro.sunset;
   console.log(
