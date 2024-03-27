@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 
-const location = "baao";
+let location = "baao";
 let date;
 let condition;
 let feelsLike;
@@ -63,3 +63,15 @@ async function getForecast(loc) {
 }
 
 getForecast(location);
+
+const searchBtn = document.querySelector("button");
+const searchField = document.querySelector("input");
+
+searchBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  const query = searchField.value;
+  location = query;
+
+  getForecast(location);
+});
