@@ -11,7 +11,13 @@ let chanceOfRain;
 let temp;
 let windSpeed;
 
-function extractData(forecast) {
+const dailyForecast = (day, temperature, weatherCondition) => ({
+  day,
+  temperature,
+  weatherCondition,
+});
+
+function extractCurrentData(forecast) {
   const latestForecast = forecast.forecast.forecastday[0];
   const { current } = forecast;
   const dateTime = format(forecast.location.localtime, "PPPPpaaa").split(
@@ -19,27 +25,71 @@ function extractData(forecast) {
   );
   const time = dateTime[1];
 
+  const tempC = `${current.temp_c}°C`;
+  const tempF = `${current.temp_f}°F`;
+  const feelsLikeC = `${current.feelslike_c}°C`;
+  const feelsLikeF = `${current.feelslike_f}°F`;
+  const windSpeedkph = `${current.wind_kph}kph`;
+  const windSpeedmph = `${current.wind_mph}mph`;
+  let data;
+
   date = `${dateTime[0]} ${time}`;
   condition = latestForecast.day.condition.text;
-  temp = `${current.temp_c}°C`;
-  feelsLike = `${current.feelslike_c}°C`;
   humidity = `${current.humidity}%`;
   chanceOfRain = `${latestForecast.day.daily_chance_of_rain}%`;
-  windSpeed = `${current.wind_kph}kph`;
   sunrise = latestForecast.astro.sunrise;
   sunset = latestForecast.astro.sunset;
-  console.log(
+  temp = [tempC, tempF];
+  feelsLike = [feelsLikeC, feelsLikeF];
+  windSpeed = [windSpeedkph, windSpeedmph];
+
+  data = [
     location,
     date,
     condition,
+    chanceOfRain,
+    humidity,
     temp,
     feelsLike,
-    humidity,
+    windSpeed,
+    sunrise,
+    sunset,
+  ];
+
+  /* console.log(
+    location,
+    date,
+    condition,
     chanceOfRain,
+    humidity,
+    temp,
+    feelsLike,
     windSpeed,
     sunrise,
     sunset
-  );
+  ); */
+
+  return data;
+}
+
+function extractWeeklyData(forecast) {
+  const { forecastday } = forecast.forecast;
+  const weeklyForecast = [];
+
+  for (let i = 1; i < forecastday.length; i++) {
+    const day = format(forecastday[i].date, "EEEE");
+    const tempC = `${forecastday[i].day.avgtemp_c}°C`;
+    const tempF = `${forecastday[i].day.avgtemp_f}°F`;
+    const dailyTemp = [tempC, tempF];
+    const dailyCondition = forecastday[i].day.condition.text;
+    const daily = dailyForecast(day, dailyTemp, dailyCondition);
+
+    weeklyForecast.push(daily);
+  }
+
+  /* console.log(weeklyForecast); */
+
+  return weeklyForecast;
 }
 
 async function getForecast(loc) {
@@ -51,18 +101,21 @@ async function getForecast(loc) {
 
     const forecast = await response.json();
 
-    if (forecast.error) console.log(forecast.error.message);
+    if (forecast.error) return console.log(forecast.error.message);
     else {
       console.log(forecast);
     }
-
-    extractData(forecast);
+    return forecast;
   } catch (err) {
-    console.log(`something went wrong ${err}`);
+    return console.log(`something went wrong ${err}`);
   }
 }
 
-getForecast(location);
+getForecast(location).then((forecast) => {
+  const current = extractCurrentData(forecast);
+  const weekly = extractWeeklyData(forecast);
+  console.log(current, weekly);
+});
 
 const searchBtn = document.querySelector("button");
 const searchField = document.querySelector("input");
@@ -73,5 +126,9 @@ searchBtn.addEventListener("click", (e) => {
   const query = searchField.value;
   location = query;
 
-  getForecast(location);
+  getForecast(location).then((forecast) => {
+    const current = extractCurrentData(forecast);
+    const weekly = extractWeeklyData(forecast);
+    console.log(current, weekly);
+  });
 });
