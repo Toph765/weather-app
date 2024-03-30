@@ -1,6 +1,10 @@
 import { format } from "date-fns";
 
+const searchBtn = document.querySelector("button");
+const unitBtn = document.querySelector(".unit");
+
 let location = "baao";
+let forecast;
 let date;
 let condition;
 let conIcon;
@@ -95,7 +99,7 @@ async function getForecast(loc) {
       { mode: "cors" }
     );
 
-    const forecast = await response.json();
+    forecast = await response.json();
 
     if (forecast.error) return console.log(forecast.error.message);
     else {
@@ -122,8 +126,9 @@ function displayData(current, weekly) {
   const sunrise = document.querySelector(".sunrise");
   const sunset = document.querySelector(".sunset");
   const weeklyForecast = document.querySelectorAll(".weekly");
+  const locData = current[0];
 
-  location.textContent = current[0];
+  location.textContent = capitalize(locData);
   date.textContent = current[1];
   condition.textContent = current[2];
   uvIndex.textContent = current[6];
@@ -170,6 +175,16 @@ function displayData(current, weekly) {
   });
 }
 
+function capitalize(text) {
+  if (text.includes(" ")) {
+    let data = text.split(" ");
+    for (let i = 0; i < data.length; i++) {
+      data[i] = data[i][0].toUpperCase() + data[i].slice(1);
+    }
+    return (data = data.join(" "));
+  } else return text[0].toUpperCase() + text.slice(1);
+}
+
 getForecast(location).then((forecast) => {
   current = extractCurrentData(forecast);
   weekly = extractWeeklyData(forecast);
@@ -177,19 +192,30 @@ getForecast(location).then((forecast) => {
   console.log(current, weekly);
 });
 
-const searchBtn = document.querySelector("button");
-const searchField = document.querySelector("input");
-
 searchBtn.addEventListener("click", (e) => {
   e.preventDefault();
+  const searchField = document.querySelector("input");
 
-  const query = searchField.value;
-  location = query;
+  location = searchField.value;
 
   getForecast(location).then((forecast) => {
     const current = extractCurrentData(forecast);
     const weekly = extractWeeklyData(forecast);
     displayData(current, weekly);
     console.log(current, weekly);
+    searchField.value = "";
   });
+});
+
+unitBtn.addEventListener("click", () => {
+  const current = extractCurrentData(forecast);
+  const weekly = extractWeeklyData(forecast);
+  const main = document.querySelector("main");
+
+  main.classList.toggle("celsius");
+
+  displayData(current, weekly);
+
+  if (main.classList.contains("celsius")) unitBtn.textContent = "°F/mph";
+  else unitBtn.textContent = "°C/kph";
 });
