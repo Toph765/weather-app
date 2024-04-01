@@ -3,7 +3,7 @@ import { format } from "date-fns";
 const searchBtn = document.querySelector("button");
 const unitBtn = document.querySelector(".unit");
 
-let location = "baao";
+let location = "manila";
 let forecast;
 let date;
 let condition;
@@ -27,6 +27,8 @@ const dailyForecast = (day, temperature, weatherCondition, icon) => ({
 });
 
 function extractCurrentData(forecast) {
+  if (forecast.error) return;
+
   const latestForecast = forecast.forecast.forecastday[0];
   const { current } = forecast;
   const dateTime = format(forecast.location.localtime, "PPPPpaaa").split(
@@ -74,6 +76,8 @@ function extractCurrentData(forecast) {
 }
 
 function extractWeeklyData(forecast) {
+  if (forecast.error) return;
+
   const { forecastday } = forecast.forecast;
   const weeklyForecast = [];
 
@@ -94,6 +98,7 @@ function extractWeeklyData(forecast) {
 
 async function getForecast(loc) {
   try {
+    const errorMsg = document.querySelector(".error");
     const response = await fetch(
       `http://api.weatherapi.com/v1/forecast.json?key=b855df3755664a11b0340510241903&q=${loc}&days=8`,
       { mode: "cors" }
@@ -101,9 +106,10 @@ async function getForecast(loc) {
 
     forecast = await response.json();
 
-    if (forecast.error) return console.log(forecast.error.message);
-    else {
-      console.log(forecast);
+    if (forecast.error) {
+      errorMsg.removeAttribute("hidden");
+    } else {
+      errorMsg.setAttribute("hidden", "");
     }
     return forecast;
   } catch (err) {
@@ -112,6 +118,8 @@ async function getForecast(loc) {
 }
 
 function displayData(current, weekly) {
+  if (current === undefined || weekly === undefined) return;
+
   const main = document.querySelector("main");
   const location = document.querySelector(".location");
   const date = document.querySelector(".date");
@@ -131,37 +139,39 @@ function displayData(current, weekly) {
   location.textContent = capitalize(locData);
   date.textContent = current[1];
   condition.textContent = current[2];
-  uvIndex.textContent = current[6];
-  humidity.textContent = current[5];
-  chanceOfRain.textContent = current[4];
-  sunrise.textContent = current[10];
-  sunset.textContent = current[11];
+  uvIndex.textContent = `UV Index: ${current[6]}`;
+  humidity.textContent = `Humidity: ${current[5]}`;
+  chanceOfRain.textContent = `Chance of Rain: ${current[4]}`;
+  sunrise.textContent = `Sunrise: ${current[10]}`;
+  sunset.textContent = `Sunset: ${current[11]}`;
 
   conIcon.src = current[3];
 
   if (main.classList.contains("celsius")) {
-    temp.textContent = current[7][0];
-    feelsLike.textContent = current[8][0];
-    windSpeed.textContent = current[9][0];
+    temp.textContent = `Temp: ${current[7][0]}`;
+    feelsLike.textContent = `Feels Like: ${current[8][0]}`;
+    windSpeed.textContent = `Wind Speed: ${current[9][0]}`;
   } else {
-    temp.textContent = current[7][1];
-    feelsLike.textContent = current[8][1];
-    windSpeed.textContent = current[9][1];
+    temp.textContent = `Temp: ${current[7][1]}`;
+    feelsLike.textContent = `Feels Like: ${current[8][1]}`;
+    windSpeed.textContent = `Wind Speed: ${current[9][1]}`;
   }
 
   let count = 0;
 
   weeklyForecast.forEach((forecast) => {
-    const day = document.createElement("span");
-    const temp = document.createElement("span");
+    const day = document.createElement("div");
+    const temp = document.createElement("div");
     const icon = document.createElement("img");
-    const condition = document.createElement("span");
+    const condition = document.createElement("div");
+    const container = document.createElement("div");
 
     while (forecast.lastElementChild)
       forecast.removeChild(forecast.lastElementChild);
 
     day.textContent = weekly[count].day;
     condition.textContent = weekly[count].weatherCondition;
+    container.classList.add("iconContainer");
 
     icon.src = weekly[count].icon;
 
@@ -169,7 +179,8 @@ function displayData(current, weekly) {
       temp.textContent = weekly[count].temperature[0];
     else temp.textContent = weekly[count].temperature[1];
 
-    forecast.append(day, temp, icon, condition);
+    container.append(icon, condition);
+    forecast.append(day, temp, container);
 
     count += 1;
   });
@@ -185,13 +196,6 @@ function capitalize(text) {
   } else return text[0].toUpperCase() + text.slice(1);
 }
 
-getForecast(location).then((forecast) => {
-  current = extractCurrentData(forecast);
-  weekly = extractWeeklyData(forecast);
-  displayData(current, weekly);
-  console.log(current, weekly);
-});
-
 searchBtn.addEventListener("click", (e) => {
   e.preventDefault();
   const searchField = document.querySelector("input");
@@ -202,7 +206,6 @@ searchBtn.addEventListener("click", (e) => {
     const current = extractCurrentData(forecast);
     const weekly = extractWeeklyData(forecast);
     displayData(current, weekly);
-    console.log(current, weekly);
     searchField.value = "";
   });
 });
@@ -218,4 +221,10 @@ unitBtn.addEventListener("click", () => {
 
   if (main.classList.contains("celsius")) unitBtn.textContent = "°F/mph";
   else unitBtn.textContent = "°C/kph";
+});
+
+document.onload = getForecast(location).then((forecast) => {
+  current = extractCurrentData(forecast);
+  weekly = extractWeeklyData(forecast);
+  displayData(current, weekly);
 });
