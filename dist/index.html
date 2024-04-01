@@ -5,35 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Weather App</title>
     <link rel="stylesheet" href="style.css" />
+    <link
+      rel="icon"
+      href="./img/icons8-partly-cloudy-day-96.png"
+      type="image/x-icon"
+    />
     <script
       src="https://kit.fontawesome.com/adad211711.js"
       crossorigin="anonymous"
     ></script>
   </head>
   <body>
-    <header>
-      <form>
-        <button><i class="fa-solid fa-magnifying-glass icon"></i></button>
-        <input type="search" id="search" name="q" />
-      </form>
-      <button class="unit">°F/mph</button>
-    </header>
     <main class="celsius">
-      <div>
-        <span class="location"></span>
-        <span class="date"></span>
-        <img src="#" alt="icon" class="conIcon" />
-        <span class="condition"></span>
-        <span class="temp"></span>
-        <span class="feelsLike"></span>
-        <span class="uvIndex"></span>
-        <span class="humidity"></span>
-        <span class="chanceOfRain"></span>
-        <span class="windSpeed"></span>
-        <span class="sunrise"></span>
-        <span class="sunset"></span>
+      <div class="left">
+        <div>
+          <form>
+            <input
+              type="search"
+              id="search"
+              name="q"
+              placeholder="Search Location..."
+            />
+            <div class="error" hidden>
+              Location data not found. No data retrieved.
+            </div>
+            <button class="searchBtn">
+              <i class="fa-solid fa-magnifying-glass icon"></i>
+            </button>
+          </form>
+          <button class="unit">°F/mph</button>
+        </div>
+
+        <div class="header">
+          <div>
+            <h1 class="location"></h1>
+            <h4 class="date"></h4>
+          </div>
+          <div>
+            <img src="#" alt="icon" class="conIcon" />
+            <div class="condition"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="left_items">
+            <div class="temp"></div>
+            <div class="uvIndex"></div>
+            <div class="chanceOfRain"></div>
+            <div class="sunrise"></div>
+          </div>
+
+          <div class="left_items">
+            <div class="feelsLike"></div>
+            <div class="humidity"></div>
+            <div class="windSpeed"></div>
+            <div class="sunset"></div>
+          </div>
+        </div>
       </div>
       <div>
+        <h3>Weekly Forecast</h3>
         <div class="weekly"></div>
         <div class="weekly"></div>
         <div class="weekly"></div>
