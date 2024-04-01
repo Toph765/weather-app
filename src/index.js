@@ -100,7 +100,7 @@ async function getForecast(loc) {
   try {
     const errorMsg = document.querySelector(".error");
     const response = await fetch(
-      `http://api.weatherapi.com/v1/forecast.json?key=b855df3755664a11b0340510241903&q=${loc}&days=8`,
+      `https://api.weatherapi.com/v1/forecast.json?key=b855df3755664a11b0340510241903&q=${loc}&days=8`,
       { mode: "cors" }
     );
 
